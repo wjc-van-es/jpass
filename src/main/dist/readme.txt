@@ -1,4 +1,4 @@
-# JPass - Password Manager 0.1.18-SNAPSHOT
+# JPass - Password Manager 0.1.21-SNAPSHOT
 
 Overview
 --------
@@ -16,27 +16,28 @@ Features:
 
 Usage
 -----
-Java 6 or later is recommended to run JPass. Most platforms have a mechanism
-to execute `.jar` files (e.g. double click the `jpass-0.1.18-SNAPSHOT.jar`).
+Java 8 or later is recommended to run JPass. Most platforms have a mechanism
+to execute `.jar` files (e.g. double click the `jpass-0.1.21-SNAPSHOT.jar`).
 You can also run the application from the command line by typing (the password
 file is optional):
 
-    java -jar jpass-0.1.18-SNAPSHOT.jar [password_file]
+    java -jar jpass-0.1.21-SNAPSHOT.jar [password_file]
 
 Configuration
 -------------
 Default configurations can be overridden in `jpass.properties` file:
 
-| Configuration key                  | Value type | Default value |
-| ---------------------------------- | ---------- | ------------- |
-| system.look.and.feel.enabled       | boolean    | true          |
-| clear.clipboard.on.exit.enabled    | boolean    | false         |
-| default.password.generation.length | integer    | 14            |
-| fetch.favicons.enabled             | boolean    | false         |
+| Configuration key                  | Value type | Default value  |
+| ---------------------------------- | ---------- | -------------- |
+| ui.theme.dark.mode.enabled         | boolean    | false          |
+| clear.clipboard.on.exit.enabled    | boolean    | false          |
+| default.password.generation.length | integer    | 14             |
+| date.format                        | string     | yyyy-MM-dd     |
+| entry.details                      | list       | TITLE,MODIFIED |
 
 License
 -------
-Copyright (c) 2009-2019 Gabor Bata
+Copyright (c) 2009-2020 Gabor Bata
 
 All rights reserved.
 
@@ -64,7 +65,7 @@ OF SUCH DAMAGE.
 
 ---
 
-This software includes MicroCrypt 0.3, covered by the following license:
+This software includes MicroCrypt, covered by the following license:
 
 Copyright (c) 2007 Timm Knape
 
@@ -126,20 +127,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-This software uses icons from the Silk icon set by Mark James.
-http://www.famfamfam.com/lab/icons/silk/
+This software uses icons from the elementary Icons project.
 
-The Silk icon set is licensed under a Creative Commons Attribution 2.5 License.
-http://creativecommons.org/licenses/by/2.5/
+These icons are licensed openly under the terms of
+the GNU General Public License.
 
----
-
-This software uses icons from the Tango base icon theme.
-http://tango.freedesktop.org/Tango_Desktop_Project
-
-The Tango base icon theme is licensed under the Creative Commons Attribution
-Share-Alike license.
-http://creativecommons.org/licenses/by-sa/2.5/
+You may obtain a copy of the License at:
+https://www.gnu.org/licenses/gpl-3.0.html
 
 ---
 
@@ -150,3 +144,30 @@ and the specific rights regarding derivate works.
 
 You may obtain a copy of the License at:
 http://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+This software includes FlatLaf - Flat Look and Feel, licensed under
+the Apache (Software) License, version 2.0 ("the License"). See the License
+for details about distribution rights, and the specific rights regarding
+derivate works.
+
+You may obtain a copy of the License at:
+http://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+This software includes SVG Salamander, licensed both under
+the LGPL and BSD licenses.
+
+You may obtain a copy of the License at:
+github.com/JFormDesigner/svgSalamander/blob/master/www/license/license-lgpl.txt
+github.com/JFormDesigner/svgSalamander/blob/master/www/license/license-bsd.txt
+
+---
+
+This software uses application logo created by Jibbie R. Eguna,
+licensed under a Creative Commons Attribution 4.0 International License.
+
+You may obtain a copy of the License at:
+https://creativecommons.org/licenses/by/4.0/

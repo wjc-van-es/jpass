@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ package jpass.ui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -43,11 +44,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import jpass.ui.action.Callback;
-
 import static javax.swing.KeyStroke.getKeyStroke;
 import static java.awt.event.KeyEvent.VK_ESCAPE;
-import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
 
 /**
  * Class for representing search panel. Search panel is hidden by default.
@@ -65,38 +63,35 @@ public class SearchPanel extends JPanel implements ActionListener {
     private final JLabel label;
     private final JTextField criteriaField;
     private final JButton closeButton;
-    private final Callback callback;
 
     /**
      * Creates a new search panel with the given callback object.
      *
      * @param searchCallback the callback used on document updates.
      */
-    public SearchPanel(Callback searchCallback) {
+    public SearchPanel(Consumer<Boolean> searchCallback) {
         super(new BorderLayout());
         setBorder(new EmptyBorder(2, 2, 2, 2));
-
-        this.callback = searchCallback;
 
         this.label = new JLabel("Find: ", MessageDialog.getIcon("find"), SwingConstants.LEADING);
 
         this.criteriaField = TextComponentFactory.newTextField();
 
-        if (this.callback != null) {
+        if (searchCallback != null) {
             this.criteriaField.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void changedUpdate(DocumentEvent e) {
-                    callback.call(isEnabled());
+                    searchCallback.accept(isEnabled());
                 }
 
                 @Override
                 public void insertUpdate(DocumentEvent e) {
-                    callback.call(isEnabled());
+                    searchCallback.accept(isEnabled());
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
-                    callback.call(isEnabled());
+                    searchCallback.accept(isEnabled());
                 }
             });
         }

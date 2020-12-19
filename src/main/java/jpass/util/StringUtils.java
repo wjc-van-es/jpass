@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,13 +79,5 @@ public final class StringUtils {
             result = text.substring(0, length) + "...";
         }
         return result;
-    }
-
-    public static String byteArrayToHex(byte[] array) {
-        StringBuilder sb = new StringBuilder(array.length * 2);
-        for (byte b : array) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
     }
 }

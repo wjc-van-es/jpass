@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,32 +29,31 @@
 package jpass.ui;
 
 import jpass.data.DataModel;
-import jpass.ui.action.Callback;
 import jpass.ui.action.CloseListener;
-import jpass.ui.action.ListListener;
 import jpass.ui.action.MenuActionType;
 import jpass.ui.helper.EntryHelper;
 import jpass.ui.helper.FileHelper;
 import jpass.util.Configuration;
+import jpass.xml.bind.Entry;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
-import javax.swing.JList;
+import javax.swing.JTable;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 
 import static jpass.ui.MessageDialog.NO_OPTION;
@@ -74,14 +73,14 @@ public final class JPassFrame extends JFrame {
     private static final Logger LOG = Logger.getLogger(JPassFrame.class.getName());
     private static final long serialVersionUID = -4114209356464342368L;
 
-    private static volatile JPassFrame INSTANCE;
+    private static JPassFrame INSTANCE;
 
     public static final String PROGRAM_NAME = "JPass Password Manager";
-    public static final String PROGRAM_VERSION = "0.1.18-SNAPSHOT";
+    public static final String PROGRAM_VERSION = "0.1.21-SNAPSHOT";
 
     private final JPopupMenu popup;
     private final JPanel topContainerPanel;
-    private final JMenuBar menuBar;
+    private final JMenuBar jpassMenuBar;
     private final SearchPanel searchPanel;
     private final JMenu fileMenu;
     private final JMenu editMenu;
@@ -89,15 +88,15 @@ public final class JPassFrame extends JFrame {
     private final JMenu helpMenu;
     private final JToolBar toolBar;
     private final JScrollPane scrollPane;
-    private final JList entryTitleList;
-    private final DefaultListModel entryTitleListModel;
+
+    private final EntryDetailsTable entryDetailsTable;
     private final DataModel model = DataModel.getInstance();
     private final StatusPanel statusPanel;
     private volatile boolean processing = false;
 
     private JPassFrame(String fileName) {
         try {
-            setIconImage(getIcon("lock").getImage());
+            setIconImage(getIcon("jpass").getImage());
         } catch (Exception e) {
             LOG.log(Level.CONFIG, "Could not set application icon.", e);
         }
@@ -121,12 +120,9 @@ public final class JPassFrame extends JFrame {
         this.toolBar.add(MenuActionType.ABOUT.getAction());
         this.toolBar.add(MenuActionType.EXIT.getAction());
 
-        this.searchPanel = new SearchPanel(new Callback() {
-            @Override
-            public void call(boolean enabled) {
-                if (enabled) {
-                    refreshEntryTitleList(null);
-                }
+        this.searchPanel = new SearchPanel(enabled -> {
+            if (enabled) {
+                refreshEntryTitleList(null);
             }
         });
 
@@ -134,7 +130,7 @@ public final class JPassFrame extends JFrame {
         this.topContainerPanel.add(this.toolBar, BorderLayout.NORTH);
         this.topContainerPanel.add(this.searchPanel, BorderLayout.SOUTH);
 
-        this.menuBar = new JMenuBar();
+        this.jpassMenuBar = new JMenuBar();
 
         this.fileMenu = new JMenu("File");
         this.fileMenu.setMnemonic(KeyEvent.VK_F);
@@ -149,7 +145,7 @@ public final class JPassFrame extends JFrame {
         this.fileMenu.add(MenuActionType.CHANGE_PASSWORD.getAction());
         this.fileMenu.addSeparator();
         this.fileMenu.add(MenuActionType.EXIT.getAction());
-        this.menuBar.add(this.fileMenu);
+        this.jpassMenuBar.add(this.fileMenu);
 
         this.editMenu = new JMenu("Edit");
         this.editMenu.setMnemonic(KeyEvent.VK_E);
@@ -163,20 +159,20 @@ public final class JPassFrame extends JFrame {
         this.editMenu.add(MenuActionType.COPY_PASSWORD.getAction());
         this.editMenu.addSeparator();
         this.editMenu.add(MenuActionType.FIND_ENTRY.getAction());
-        this.menuBar.add(this.editMenu);
+        this.jpassMenuBar.add(this.editMenu);
 
         this.toolsMenu = new JMenu("Tools");
         this.toolsMenu.setMnemonic(KeyEvent.VK_T);
         this.toolsMenu.add(MenuActionType.GENERATE_PASSWORD.getAction());
         this.toolsMenu.add(MenuActionType.CLEAR_CLIPBOARD.getAction());
-        this.menuBar.add(this.toolsMenu);
+        this.jpassMenuBar.add(this.toolsMenu);
 
         this.helpMenu = new JMenu("Help");
         this.helpMenu.setMnemonic(KeyEvent.VK_H);
         this.helpMenu.add(MenuActionType.LICENSE.getAction());
         this.helpMenu.addSeparator();
         this.helpMenu.add(MenuActionType.ABOUT.getAction());
-        this.menuBar.add(this.helpMenu);
+        this.jpassMenuBar.add(this.helpMenu);
 
         this.popup = new JPopupMenu();
         this.popup.add(MenuActionType.ADD_ENTRY.getAction());
@@ -190,14 +186,9 @@ public final class JPassFrame extends JFrame {
         this.popup.addSeparator();
         this.popup.add(MenuActionType.FIND_ENTRY.getAction());
 
-        this.entryTitleListModel = new DefaultListModel();
-        this.entryTitleList = new JList(this.entryTitleListModel);
-        this.entryTitleList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        this.entryTitleList.addMouseListener(new ListListener());
-        this.entryTitleList.setCellRenderer(new IconedListCellRenderer());
-
-        this.scrollPane = new JScrollPane(this.entryTitleList);
-        MenuActionType.bindAllActions(this.entryTitleList);
+        this.entryDetailsTable = new EntryDetailsTable();
+        this.scrollPane = new JScrollPane(this.entryDetailsTable);
+        MenuActionType.bindAllActions(this.entryDetailsTable);
 
         this.statusPanel = new StatusPanel();
 
@@ -207,9 +198,9 @@ public final class JPassFrame extends JFrame {
         getContentPane().add(this.scrollPane, BorderLayout.CENTER);
         getContentPane().add(this.statusPanel, BorderLayout.SOUTH);
 
-        setJMenuBar(this.menuBar);
+        setJMenuBar(this.jpassMenuBar);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        setSize(420, 400);
+        setSize(450, 400);
         setMinimumSize(new Dimension(420, 200));
         addWindowListener(new CloseListener());
         setLocationRelativeTo(null);
@@ -217,20 +208,16 @@ public final class JPassFrame extends JFrame {
         FileHelper.doOpenFile(fileName, this);
 
         // set focus to the list for easier keyboard navigation
-        this.entryTitleList.requestFocusInWindow();
+        this.entryDetailsTable.requestFocusInWindow();
     }
 
     public static JPassFrame getInstance() {
         return getInstance(null);
     }
 
-    public static JPassFrame getInstance(String fileName) {
+    public static synchronized JPassFrame getInstance(String fileName) {
         if (INSTANCE == null) {
-            synchronized (JPassFrame.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new JPassFrame(fileName);
-                }
-            }
+            INSTANCE = new JPassFrame(fileName);
         }
         return INSTANCE;
     }
@@ -240,8 +227,8 @@ public final class JPassFrame extends JFrame {
      *
      * @return entry title list
      */
-    public JList getEntryTitleList() {
-        return this.entryTitleList;
+    public JTable getEntryTitleTable() {
+        return this.entryDetailsTable;
     }
 
     /**
@@ -258,7 +245,7 @@ public final class JPassFrame extends JFrame {
      */
     public void clearModel() {
         this.model.clear();
-        this.entryTitleListModel.clear();
+        this.entryDetailsTable.clear();
     }
 
     /**
@@ -276,25 +263,23 @@ public final class JPassFrame extends JFrame {
      * @param selectTitle title to select, or {@code null} if nothing to select
      */
     public void refreshEntryTitleList(String selectTitle) {
-        this.entryTitleListModel.clear();
-        List<String> titles = this.model.getTitles();
-        Collections.sort(titles, String.CASE_INSENSITIVE_ORDER);
-
+        this.entryDetailsTable.clear();
+        List<Entry> entries = new ArrayList<>(this.model.getEntries().getEntry());
+        Collections.sort(entries, Comparator.comparing(Entry::getTitle, String.CASE_INSENSITIVE_ORDER));
         String searchCriteria = this.searchPanel.getSearchCriteria();
-        for (String title : titles) {
-            if (searchCriteria.isEmpty() || title.toLowerCase().contains(searchCriteria.toLowerCase())) {
-                this.entryTitleListModel.addElement(title);
-            }
-        }
+        entries.stream()
+                .filter(entry -> searchCriteria.isEmpty() || entry.getTitle().toLowerCase().contains(searchCriteria.toLowerCase()))
+                .forEach(this.entryDetailsTable::addRow);
 
         if (selectTitle != null) {
-            this.entryTitleList.setSelectedValue(selectTitle, true);
+            int index = this.model.getEntryIndexByTitle(selectTitle);
+            this.entryDetailsTable.setRowSelectionInterval(index, index);
         }
 
         if (searchCriteria.isEmpty()) {
-            this.statusPanel.setText("Entries count: " + titles.size());
+            this.statusPanel.setText("Entries count: " + entries.size());
         } else {
-            this.statusPanel.setText("Entries found: " + this.entryTitleListModel.size() + " / " + titles.size());
+            this.statusPanel.setText("Entries found: " + this.entryDetailsTable.getRowCount() + " / " + entries.size());
         }
     }
 
@@ -321,12 +306,9 @@ public final class JPassFrame extends JFrame {
             int option = showQuestionMessage(this,
                     "The current file has been modified.\nDo you want to save the changes before closing?", YES_NO_CANCEL_OPTION);
             if (option == YES_OPTION) {
-                FileHelper.saveFile(this, false, new Callback() {
-                    @Override
-                    public void call(boolean result) {
-                        if (result) {
-                            System.exit(0);
-                        }
+                FileHelper.saveFile(this, false, result -> {
+                    if (result) {
+                        System.exit(0);
                     }
                 });
                 return;
@@ -352,7 +334,7 @@ public final class JPassFrame extends JFrame {
             actionType.getAction().setEnabled(!processing);
         }
         this.searchPanel.setEnabled(!processing);
-        this.entryTitleList.setEnabled(!processing);
+        this.entryDetailsTable.setEnabled(!processing);
         this.statusPanel.setProcessing(processing);
     }
 

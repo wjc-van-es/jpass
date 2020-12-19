@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,7 +176,7 @@ public final class GeneratePasswordDialog extends JDialog implements ActionListe
         this.generateButton.setActionCommand("generate_button");
         this.generateButton.addActionListener(this);
         this.generateButton.setMnemonic(KeyEvent.VK_G);
-        JPanel generateButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        JPanel generateButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 5));
         generateButtonPanel.add(this.generateButton);
         this.passwordPanel.add(generateButtonPanel, BorderLayout.SOUTH);
 
@@ -256,7 +256,7 @@ public final class GeneratePasswordDialog extends JDialog implements ActionListe
     /**
      * Gets the generated password.
      *
-     * @return if the password is not generated than the return value is {@code null}, otherwise the
+     * @return if the password is not generated then the return value is {@code null}, otherwise the
      * generated password
      */
     public String getGeneratedPassword() {

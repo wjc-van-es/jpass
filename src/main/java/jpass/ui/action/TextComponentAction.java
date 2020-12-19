@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ public abstract class TextComponentAction extends TextAction {
         if (accelerator != null) {
             putValue(ACCELERATOR_KEY, accelerator);
         }
-        putValue(MNEMONIC_KEY, Integer.valueOf(mnemonic));
+        putValue(MNEMONIC_KEY, mnemonic);
     }
 
     public abstract boolean isEnabled(JTextComponent component);

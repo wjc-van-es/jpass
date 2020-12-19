@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,16 +28,18 @@
  */
 package jpass;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.plaf.ColorUIResource;
-import javax.swing.plaf.metal.DefaultMetalTheme;
-import javax.swing.plaf.metal.MetalLookAndFeel;
 
 import jpass.ui.JPassFrame;
 import jpass.util.Configuration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 
 /**
  * Entry point of JPass.
@@ -48,7 +50,6 @@ import java.util.logging.Logger;
 public class JPass {
 
     private static final Logger LOG = Logger.getLogger(JPass.class.getName());
-    private static final String METAL_LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";
 
     static {
         System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] [%4$-7s] %5$s %n");
@@ -56,66 +57,21 @@ public class JPass {
 
     public static void main(final String[] args) {
         try {
-            String lookAndFeel;
-            if (Configuration.getInstance().is("system.look.and.feel.enabled", true)) {
-                lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+            FlatLaf lookAndFeel;
+            if (Configuration.getInstance().is("ui.theme.dark.mode.enabled", false)) {
+                FlatDarkLaf.install();
+                lookAndFeel = new FlatDarkLaf();
             } else {
-                lookAndFeel = METAL_LOOK_AND_FEEL;
+                FlatLightLaf.install();
+                lookAndFeel = new FlatLightLaf();
             }
-
-            if (METAL_LOOK_AND_FEEL.equals(lookAndFeel)) {
-                MetalLookAndFeel.setCurrentTheme(new DefaultMetalTheme() {
-                    private final ColorUIResource primary1 = new ColorUIResource(0x4d6781);
-                    private final ColorUIResource primary2 = new ColorUIResource(0x7a96b0);
-                    private final ColorUIResource primary3 = new ColorUIResource(0xc8d4e2);
-                    private final ColorUIResource secondary1 = new ColorUIResource(0x000000);
-                    private final ColorUIResource secondary2 = new ColorUIResource(0xaaaaaa);
-                    private final ColorUIResource secondary3 = new ColorUIResource(0xdfdfdf);
-
-                    @Override
-                    protected ColorUIResource getPrimary1() {
-                        return this.primary1;
-                    }
-
-                    @Override
-                    protected ColorUIResource getPrimary2() {
-                        return this.primary2;
-                    }
-
-                    @Override
-                    protected ColorUIResource getPrimary3() {
-                        return this.primary3;
-                    }
-
-                    @Override
-                    protected ColorUIResource getSecondary1() {
-                        return this.secondary1;
-                    }
-
-                    @Override
-                    protected ColorUIResource getSecondary2() {
-                        return this.secondary2;
-                    }
-
-                    @Override
-                    protected ColorUIResource getSecondary3() {
-                        return this.secondary3;
-                    }
-                });
-
-                UIManager.put("swing.boldMetal", Boolean.FALSE);
-            }
-
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
             UIManager.setLookAndFeel(lookAndFeel);
         } catch (Exception e) {
             LOG.log(Level.CONFIG, "Could not set look and feel for the application", e);
         }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                JPassFrame.getInstance((args.length > 0) ? args[0] : null);
-            }
-        });
+        SwingUtilities.invokeLater(() -> JPassFrame.getInstance((args.length > 0) ? args[0] : null));
     }
 }

@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,19 +31,16 @@ package jpass.ui.helper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-import jpass.data.DocumentHelper;
+import jpass.data.DocumentRepository;
 import jpass.ui.JPassFrame;
 import jpass.ui.MessageDialog;
-import jpass.ui.action.Callback;
 import jpass.ui.action.Worker;
-import jpass.util.IconStorage;
 import jpass.util.StringUtils;
-import jpass.xml.bind.Entry;
 
 /**
  * Helper utils for file operations.
@@ -70,14 +67,11 @@ public final class FileHelper {
                     + "Do you want to save the changes before closing?",
                     MessageDialog.YES_NO_CANCEL_OPTION);
             if (option == MessageDialog.YES_OPTION) {
-                saveFile(parent, false, new Callback() {
-                    @Override
-                    public void call(boolean result) {
-                        if (result) {
-                            parent.clearModel();
-                            parent.getSearchPanel().setVisible(false);
-                            parent.refreshAll();
-                        }
+                saveFile(parent, false, result -> {
+                    if (result) {
+                        parent.clearModel();
+                        parent.getSearchPanel().setVisible(false);
+                        parent.refreshAll();
                     }
                 });
                 return;
@@ -110,7 +104,7 @@ public final class FileHelper {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    DocumentHelper.newInstance(fileName).writeDocument(parent.getModel().getEntries());
+                    DocumentRepository.newInstance(fileName).writeDocument(parent.getModel().getEntries());
                 } catch (Throwable e) {
                     throw new Exception("An error occured during the export operation:\n" + e.getMessage());
                 }
@@ -138,12 +132,9 @@ public final class FileHelper {
                     + "Do you want to save the changes before closing?",
                     MessageDialog.YES_NO_CANCEL_OPTION);
             if (option == MessageDialog.YES_OPTION) {
-                saveFile(parent, false, new Callback() {
-                    @Override
-                    public void call(boolean result) {
-                        if (result) {
-                            doImportFile(fileName, parent);
-                        }
+                saveFile(parent, false, result -> {
+                    if (result) {
+                        doImportFile(fileName, parent);
                     }
                 });
                 return;
@@ -165,12 +156,11 @@ public final class FileHelper {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    parent.getModel().setEntries(DocumentHelper.newInstance(fileName).readDocument());
+                    parent.getModel().setEntries(DocumentRepository.newInstance(fileName).readDocument());
                     parent.getModel().setModified(true);
                     parent.getModel().setFileName(null);
                     parent.getModel().setPassword(null);
                     parent.getSearchPanel().setVisible(false);
-                    preloadDomainIcons(parent.getModel().getEntries().getEntry());
                 } catch (Throwable e) {
                     throw new Exception("An error occured during the import operation:\n" + e.getMessage());
                 }
@@ -187,11 +177,8 @@ public final class FileHelper {
      * @param saveAs normal 'Save' dialog or 'Save as'
      */
     public static void saveFile(final JPassFrame parent, final boolean saveAs) {
-        saveFile(parent, saveAs, new Callback() {
-            @Override
-            public void call(boolean result) {
-                //default empty call
-            }
+        saveFile(parent, saveAs, result -> {
+            //default empty call
         });
     }
 
@@ -203,17 +190,17 @@ public final class FileHelper {
      * @param callback callback function with the result; the result is {@code true} if the file
      * successfully saved; otherwise {@code false}
      */
-    public static void saveFile(final JPassFrame parent, final boolean saveAs, final Callback callback) {
+    public static void saveFile(final JPassFrame parent, final boolean saveAs, final Consumer<Boolean> callback) {
         final String fileName;
         if (saveAs || parent.getModel().getFileName() == null) {
             File file = showFileChooser(parent, "Save", "jpass", "JPass Data Files (*.jpass)");
             if (file == null) {
-                callback.call(false);
+                callback.accept(false);
                 return;
             }
             fileName = checkExtension(file.getPath(), "jpass");
             if (!checkFileOverwrite(fileName, parent)) {
-                callback.call(false);
+                callback.accept(false);
                 return;
             }
         } else {
@@ -224,7 +211,7 @@ public final class FileHelper {
         if (parent.getModel().getPassword() == null) {
             password = MessageDialog.showPasswordDialog(parent, true);
             if (password == null) {
-                callback.call(false);
+                callback.accept(false);
                 return;
             }
         } else {
@@ -234,7 +221,7 @@ public final class FileHelper {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    DocumentHelper.newInstance(fileName, password).writeDocument(parent.getModel().getEntries());
+                    DocumentRepository.newInstance(fileName, password).writeDocument(parent.getModel().getEntries());
                     parent.getModel().setFileName(fileName);
                     parent.getModel().setPassword(password);
                     parent.getModel().setModified(false);
@@ -254,7 +241,7 @@ public final class FileHelper {
                     result = false;
                     showErrorMessage(e);
                 }
-                callback.call(result);
+                callback.accept(result);
             }
         };
         worker.execute();
@@ -277,12 +264,9 @@ public final class FileHelper {
                     + "Do you want to save the changes before closing?",
                     MessageDialog.YES_NO_CANCEL_OPTION);
             if (option == MessageDialog.YES_OPTION) {
-                saveFile(parent, false, new Callback() {
-                    @Override
-                    public void call(boolean result) {
-                        if (result) {
-                            doOpenFile(file.getPath(), parent);
-                        }
+                saveFile(parent, false, result -> {
+                    if (result) {
+                        doOpenFile(file.getPath(), parent);
                     }
                 });
                 return;
@@ -312,11 +296,10 @@ public final class FileHelper {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    parent.getModel().setEntries(DocumentHelper.newInstance(fileName, password).readDocument());
+                    parent.getModel().setEntries(DocumentRepository.newInstance(fileName, password).readDocument());
                     parent.getModel().setFileName(fileName);
                     parent.getModel().setPassword(password);
                     parent.getSearchPanel().setVisible(false);
-                    preloadDomainIcons(parent.getModel().getEntries().getEntry());
                 } catch (FileNotFoundException e) {
                     throw e;
                 } catch (IOException e) {
@@ -333,7 +316,7 @@ public final class FileHelper {
                 try {
                     get();
                 } catch (Exception e) {
-                    if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
+                    if (e.getCause() instanceof FileNotFoundException) {
                         handleFileNotFound(parent, fileName, password);
                     } else {
                         showErrorMessage(e);
@@ -359,11 +342,11 @@ public final class FileHelper {
                 @Override
                 protected Void doInBackground() throws Exception {
                     try {
-                        DocumentHelper.newInstance(fileName, password).writeDocument(parent.getModel().getEntries());
+                        DocumentRepository.newInstance(fileName, password).writeDocument(parent.getModel().getEntries());
                         parent.getModel().setFileName(fileName);
                         parent.getModel().setPassword(password);
                     } catch (Exception ex) {
-                        throw new Exception("An error occured during the open operation:\n" + ex.getMessage());
+                        throw new Exception("An error occurred during the open operation:\n" + ex.getMessage());
                     }
                     return null;
                 }
@@ -437,17 +420,5 @@ public final class FileHelper {
             return fileName + separator + extension;
         }
         return fileName;
-    }
-
-    /**
-     * Preload favicon image icons for domains.
-     *
-     * @param entries the entries
-     */
-    private static void preloadDomainIcons(List<Entry> entries) {
-        IconStorage iconStorage = IconStorage.newInstance();
-        for (Entry entry : entries) {
-            iconStorage.getIcon(entry.getUrl());
-        }
     }
 }

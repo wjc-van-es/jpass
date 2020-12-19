@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,7 +131,7 @@ public class EntryDialog extends JDialog implements ActionListener {
         this.fieldPanel.add(this.repeatField);
 
         this.fieldPanel.add(new JLabel(""));
-        this.passwordButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        this.passwordButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         this.showButton = new JToggleButton("Show", MessageDialog.getIcon("show"));
         this.showButton.setActionCommand("show_button");
         this.showButton.setMnemonic(KeyEvent.VK_S);
@@ -184,7 +184,7 @@ public class EntryDialog extends JDialog implements ActionListener {
         getContentPane().add(this.buttonPanel, BorderLayout.SOUTH);
 
         fillDialogData(entry);
-        setSize(420, 400);
+        setSize(450, 400);
         setMinimumSize(new Dimension(370, 300));
         setLocationRelativeTo(parent);
         setVisible(true);
@@ -280,7 +280,7 @@ public class EntryDialog extends JDialog implements ActionListener {
     /**
      * Gets the form data (entry) of this dialog.
      *
-     * @return nonempty form data if the 'OK1 button is pressed, otherwise an empty data
+     * @return nonempty form data if the 'OK' button is pressed, otherwise an empty data
      */
     public Entry getFormData() {
         return this.formData;
@@ -289,7 +289,7 @@ public class EntryDialog extends JDialog implements ActionListener {
     /**
      * Checks the entry title.
      *
-     * @return if the entry title is already exists in the data model than returns {@code false},
+     * @return if the entry title already exists in the data model then returns {@code false},
      * otherwise {@code true}
      */
     private boolean checkEntryTitle() {

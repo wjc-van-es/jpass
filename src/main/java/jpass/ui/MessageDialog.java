@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +64,7 @@ import jpass.util.SpringUtilities;
 import jpass.util.StringUtils;
 
 /**
- * Utility class for displaying message dialogs.
+ * Utility class for displaying message dialog.
  *
  * @author Gabor_Bata
  *
@@ -260,9 +261,9 @@ public final class MessageDialog extends JDialog implements ActionListener {
         }
         panel.setLayout(new SpringLayout());
         SpringUtilities.makeCompactGrid(panel, confirm ? 2 : 1, 2, 5, 5, 5, 5);
-        boolean notCorrect = true;
+        boolean incorrect = true;
 
-        while (notCorrect) {
+        while (incorrect) {
             int option = showMessageDialog(parent, panel, "Enter Password", getIcon("dialog_lock"), OK_CANCEL_OPTION);
             if (option == OK_OPTION) {
                 if (password.getPassword().length == 0) {
@@ -270,7 +271,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
                 } else if (confirm && !Arrays.equals(password.getPassword(), repeat.getPassword())) {
                     showWarningMessage(parent, "Password and repeated password are not identical.");
                 } else {
-                    notCorrect = false;
+                    incorrect = false;
                 }
             } else {
                 return null;
@@ -295,7 +296,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
      */
     public static ImageIcon getIcon(String name) {
         try {
-            return new ImageIcon(MessageDialog.class.getClassLoader().getResource("resources/images/" + name + ".png"));
+            return new SvgImageIcon("resources/images/" + name + ".svg");
         } catch (Exception e) {
             return null;
         }
@@ -309,7 +310,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
         BufferedReader bufferedReader = null;
         try {
             InputStream is = MessageDialog.class.getClassLoader().getResourceAsStream("resources/" + name);
-            bufferedReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 builder.append(line).append('\n');

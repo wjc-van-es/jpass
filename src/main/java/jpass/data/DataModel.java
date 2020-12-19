@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
  */
 package jpass.data;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jpass.xml.bind.Entries;
 import jpass.xml.bind.Entry;
@@ -42,11 +42,11 @@ import jpass.xml.bind.Entry;
  */
 public class DataModel {
 
-    private static volatile DataModel INSTANCE;
+    private static DataModel INSTANCE;
 
     private Entries entries = new Entries();
     private String fileName = null;
-    private transient byte[] password = null;
+    private byte[] password = null;
     private boolean modified = false;
 
     private DataModel() {
@@ -58,13 +58,9 @@ public class DataModel {
      *
      * @return instance of the DataModel
      */
-    public static DataModel getInstance() {
+    public static synchronized DataModel getInstance() {
         if (INSTANCE == null) {
-            synchronized (DataModel.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new DataModel();
-                }
-            }
+            INSTANCE = new DataModel();
         }
         return INSTANCE;
     }
@@ -147,11 +143,9 @@ public class DataModel {
      * @return list of entry titles
      */
     public List<String> getTitles() {
-        List<String> list = new ArrayList<String>(this.entries.getEntry().size());
-        for (Entry entry : this.entries.getEntry()) {
-            list.add(entry.getTitle());
-        }
-        return list;
+        return this.entries.getEntry().stream()
+                .map(Entry::getTitle)
+                .collect(Collectors.toList());
     }
 
     /**

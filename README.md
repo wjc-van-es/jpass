@@ -1,8 +1,8 @@
 <p align="center">
- <img src="https://raw.githubusercontent.com/gaborbata/jpass/master/LogoDesign/bannerReadMe.png" width=750 align="center">
+ <img src="https://raw.githubusercontent.com/gaborbata/jpass/master/resources/bannerReadMe.png" width=750 align="center">
 </p>
 
-JPass [![Build Status](https://travis-ci.org/gaborbata/jpass.svg?branch=master)](https://travis-ci.org/gaborbata/jpass)
+JPass [![Build Status](https://travis-ci.org/gaborbata/jpass.svg?branch=master)](https://travis-ci.org/gaborbata/jpass) ![Java CI with Maven](https://github.com/gaborbata/jpass/workflows/Java%20CI%20with%20Maven/badge.svg)
 =====
 
 Overview
@@ -17,14 +17,14 @@ Features:
 * Organize all your user name, password, URL and notes information in one file
 * Data import/export in XML format
 
-![JPass](https://raw.githubusercontent.com/gaborbata/jpass/master/resources/jpass-capture.gif)
+![JPass](https://raw.githubusercontent.com/gaborbata/jpass/master/resources/jpass-capture.png)
 
 Usage
 -----
-Java 6 or later is recommended to run JPass. Most platforms have a mechanism to execute `.jar` files (e.g. double click the `jpass-0.1.18-SNAPSHOT.jar`).
+Java 8 or later is recommended to run JPass. Most platforms have a mechanism to execute `.jar` files (e.g. double click the `jpass-0.1.21-SNAPSHOT.jar`).
 You can also run the application from the command line by typing (the password file is optional):
 
-    java -jar jpass-0.1.18-SNAPSHOT.jar [password_file]
+    java -jar jpass-0.1.21-SNAPSHOT.jar [password_file]
 
 Download
 --------
@@ -40,12 +40,13 @@ Configuration
 -------------
 Default configurations can be overridden in `jpass.properties` file:
 
-| Configuration key                  | Value type | Default value |
-| ---------------------------------- | ---------- | ------------- |
-| system.look.and.feel.enabled       | boolean    | true          |
-| clear.clipboard.on.exit.enabled    | boolean    | false         |
-| default.password.generation.length | integer    | 14            |
-| fetch.favicons.enabled             | boolean    | false         |
+| Configuration key                  | Value type | Default value  |
+| ---------------------------------- | ---------- | -------------- |
+| ui.theme.dark.mode.enabled         | boolean    | false          |
+| clear.clipboard.on.exit.enabled    | boolean    | false          |
+| default.password.generation.length | integer    | 14             |
+| date.format                        | string     | yyyy-MM-dd     |
+| entry.details                      | list       | TITLE,MODIFIED |
 
 Contributors
 ------------

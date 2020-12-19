@@ -1,7 +1,7 @@
 /*
  * JPass
  *
- * Copyright (c) 2009-2019 Gabor Bata
+ * Copyright (c) 2009-2020 Gabor Bata
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 public final class Configuration {
 
     private static final Logger LOG = Logger.getLogger(Configuration.class.getName());
-    private static volatile Configuration INSTANCE;
+    private static Configuration INSTANCE;
     private Properties properties = new Properties();
 
     private Configuration() {
@@ -84,13 +84,17 @@ public final class Configuration {
         return properties.getProperty(key, defaultValue);
     }
 
-    public static Configuration getInstance() {
+    public String[] getArray(String key, String[] defaultValue) {
+        String prop = properties.getProperty(key);
+        if (prop != null) {
+            return prop.split(",");
+        }
+        return defaultValue;
+    }
+
+    public static synchronized Configuration getInstance() {
         if (INSTANCE == null) {
-            synchronized (Configuration.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new Configuration();
-                }
-            }
+            INSTANCE = new Configuration();
         }
         return INSTANCE;
     }
