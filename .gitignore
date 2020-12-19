@@ -47,3 +47,9 @@ nb-configuration.xml
 # IntelliJ files
 *.iml
 .idea/
+
+# gradle artefacts
+/gradle/wrapper/gradle-wrapper.jar
+/gradle/wrapper/gradle-wrapper.properties
+/gradlew
+/gradlew.bat
