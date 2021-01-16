@@ -57,6 +57,7 @@ public class JPass {
 
     public static void main(final String[] args) {
         try {
+         //// Start of block of dead code - I left it in to demonstrate it didn't cause NoClassDefFoundError
             FlatLaf lookAndFeel;
             if (Configuration.getInstance().is("ui.theme.dark.mode.enabled", false)) {
                 FlatDarkLaf.install();
@@ -65,9 +66,16 @@ public class JPass {
                 FlatLightLaf.install();
                 lookAndFeel = new FlatLightLaf();
             }
+        //// End of block of dead code ///////////////////////////////////
+
             JFrame.setDefaultLookAndFeelDecorated(true);
             JDialog.setDefaultLookAndFeelDecorated(true);
-            UIManager.setLookAndFeel(lookAndFeel);
+
+            // Ultimately results in a java.lang.NoClassDefFoundError during the call to the
+            // jpass.ui.JPassFrame.JPassFrame constructor:
+            // com/formdev/flatlaf/util/MultiResolutionImageSupport$MappedMultiResolutionImage
+            //UIManager.setLookAndFeel(lookAndFeel);
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); //falling back on system default
         } catch (Exception e) {
             LOG.log(Level.CONFIG, "Could not set look and feel for the application", e);
         }

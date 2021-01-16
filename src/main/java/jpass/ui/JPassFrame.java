@@ -204,7 +204,7 @@ public final class JPassFrame extends JFrame {
         setMinimumSize(new Dimension(420, 200));
         addWindowListener(new CloseListener());
         setLocationRelativeTo(null);
-        setVisible(true);
+        setVisible(true); // this triggers the classloading problem when using com.formdev.flatlaf.FlatLaf look and feel
         FileHelper.doOpenFile(fileName, this);
 
         // set focus to the list for easier keyboard navigation
